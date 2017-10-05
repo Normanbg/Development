@@ -30,8 +30,31 @@ void j1Map::Draw()
 {
 	if(map_loaded == false)
 		return;
-
+	
 	// TODO 5: Prepare the loop to draw all tilesets + Blit
+	p2List_item<MapLayer*>* item_draw = nullptr;
+	MapLayer* layer = nullptr;
+	uint tile_id;
+	TileSet* tileset = nullptr;
+
+	for (item_draw = data.layers.start; item_draw; item_draw->next)
+	{
+		for (int j = 0; j < data.height; j++)
+		{
+			for (int i = 0; i < data.width; i++)
+			{
+				tile_id = layer->tiles[layer->Get(i, j)];
+				if (tile_id != 0)
+				{
+					SDL_Texture* texture = data.tilesets.start->data->texture;
+					iPoint position = MapToWorld(i, j);
+					SDL_Rect* sect = &data.tilesets.start->data->GetTileRect(tile_id);
+
+					App->render->Blit(texture, position.x, position.y, sect);
+				}
+			}
+		}
+	}
 
 		// TODO 9: Complete the draw function
 
@@ -165,7 +188,7 @@ bool j1Map::Load(const char* file_name)
 
 		// TODO 4: Add info here about your loaded layers
 		// Adapt this vcode with your own variables
-		/*
+		
 		p2List_item<MapLayer*>* item_layer = data.layers.start;
 		while(item_layer != NULL)
 		{
@@ -174,7 +197,7 @@ bool j1Map::Load(const char* file_name)
 			LOG("name: %s", l->name.GetString());
 			LOG("tile width: %d tile height: %d", l->width, l->height);
 			item_layer = item_layer->next;
-		}*/
+		}
 	}
 
 	map_loaded = ret;
