@@ -77,7 +77,15 @@ bool j1Map::CleanUp()
 
 	// TODO 2: clean up all layer data
 	// Remove all layers
+	p2List_item<MapLayer*>* item2;
+	item2 = data.layers.start;
 
+	while (item2 != NULL)
+	{
+		RELEASE(item2->data);
+		item2 = item2->next;
+	}
+	data.layers.clear();
 
 	// Clean up the pugui tree
 	map_file.reset();
@@ -126,8 +134,18 @@ bool j1Map::Load(const char* file_name)
 
 	// TODO 4: Iterate all layers and load each of them
 	// Load layer info ----------------------------------------------
+	pugi::xml_node layer;
+	for (layer = map_file.child("map").child("tileset"); tileset && ret; tileset = tileset.next_sibling("tile"))
+	{
+		MapLayer* set = new MapLayer();
 
-
+		if (ret == true)
+		{
+			ret = LoadLayer(layer, set);
+		}
+		data.layers.add(set);
+	}
+	
 	if(ret == true)
 	{
 		LOG("Successfully parsed map XML file: %s", file_name);
@@ -292,6 +310,20 @@ bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set)
 }
 
 // TODO 3: Create the definition for a function that loads a single layer
-//bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
-//{
-//}
+bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
+{
+	bool ret = true;
+	layer->height = node.attribute("height").as_uint(0);
+	layer->width = node.attribute("width").as_uint(0);
+	layer->name = node.attribute("name").as_string(0);
+	layer->size = layer->height * layer->width;
+
+	layer->tiles = new uint[layer->size];
+	memset(layer->tiles, 0, sizeof(uint)* layer->size);
+	int i = 0;
+	for (pugi::xml_node tile = node.child("data").child("tile"); tile; tile.next_sibling("tile"))
+	{
+		layer->tiles[i++] = tile.attribute("gid").as_uint();
+	}
+	return true;
+}
