@@ -41,11 +41,25 @@ void j1Map::PropagateBFS()
 	// pop the last one and calculate its 4 neighbors
 	if (frontier.Count() != 0)
 	{
-		frontier.Pop(frontier.GetLast());
-	}
+		iPoint last = frontier.GetLast()->data;
+		frontier.Pop(last);
+		p2List<iPoint> neighbors;
+		neighbors.add({ last.x - 1, last.y });
+		neighbors.add({ last.x + 1, last.y });
+		neighbors.add({ last.x, last.y + 1});
+		neighbors.add({ last.x, last.y - 1 });
 
-	// TODO 2: For each neighbor, if not visited, add it
-	// to the frontier queue and visited list
+		// TODO 2: For each neighbor, if not visited, add it
+		// to the frontier queue and visited list
+		for (p2List_item<iPoint>* neighbor = neighbors.start; neighbor; neighbor = neighbor->next)
+		{
+			if (visited.find(neighbor->data) == -1 && IsWalkable(neighbor->data.x, neighbor->data.y))
+			{
+				frontier.Push(neighbor->data);
+				visited.add(neighbor->data);
+			}
+		}
+	}
 }
 
 void j1Map::DrawBFS()
@@ -86,6 +100,30 @@ bool j1Map::IsWalkable(int x, int y) const
 {
 	// TODO 3: return true only if x and y are within map limits
 	// and the tile is walkable (tile id 0 in the navigation layer)
+	bool ret = false;
+
+	p2List_item<MapLayer*>* nav_layer = nullptr;
+	for (p2List_item<MapLayer*>* layer = data.layers.start; layer; layer = layer->next)
+	{
+		for (p2List_item<Properties::Property*>* item = layer->data->properties.list.start; item; item = item->next)
+		{
+			if (item->data->name == "Navigation" && item->data->value == 1)
+			{
+				nav_layer = layer;
+				break;
+			}
+		}
+	}
+
+	if (x >= 0 && x < data.width && y >= 0 && y < data.height)
+	{
+		if (nav_layer->data->Get(x, y) == 0)
+		{
+			ret = true;
+		}
+	}
+
+	return ret;
 	return true;
 }
 
