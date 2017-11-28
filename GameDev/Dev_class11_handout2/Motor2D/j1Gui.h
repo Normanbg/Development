@@ -9,6 +9,11 @@
 struct _TTF_Font;
 struct SDL_Texture;
 
+enum event_type
+{
+	MOUSE_ENTER,
+	MOUSE_LEAVE
+};
 
 enum button_state
 {

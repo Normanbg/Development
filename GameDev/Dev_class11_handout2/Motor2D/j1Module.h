@@ -72,8 +72,9 @@ public:
 		return true;
 	}
 
+	/*virtual void Ui_event(SDL_Event )
+	*/
 public:
-
 	p2SString	name;
 	bool		active;
 
